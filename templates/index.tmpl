@@ -1,0 +1,119 @@
+<!doctype>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Game scores</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        background: #fff;
+        font-size: 120%;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      main {
+        max-width: 30rem;
+        margin: 2rem auto;
+      }
+
+      main > h1 {
+        text-align: center;
+      }
+
+      .titles,
+      #scores > li {
+        display: flex;
+      }
+
+      .titles {
+        font-style: italic;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 3px;
+        margin-bottom: 5px;
+      }
+
+      #scores {
+        margin: 0;
+        padding: 0;
+        font-size: 1.2rem;
+      }
+
+      .name {
+        padding-right: 10px;
+        width: 50%;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Game scores</h1>
+
+      <div class="titles">
+        <div class="name">Name</div>
+        <div class="score">Score</div>
+      </div>
+
+      <ul id="scores">
+      </ul>
+    </main>
+
+    <script>
+      var es = new EventSource('/events');
+      var scoresEl = document.querySelector('#scores');
+
+      es.addEventListener('open', function () {
+        console.log('connected to events');
+      });
+      es.addEventListener('message', function (e) {
+        var data = null;
+
+        try {
+          data = JSON.parse(e.data);
+        } catch (ex) {
+          console.log('couldn\'t parse', e.data);
+          return;
+        }
+
+        if(typeof data === 'object') {
+          renderScores(data);
+        }
+      });
+      es.addEventListener('error', function () {
+        console.log('lost events connection');
+      });
+
+      function renderScores(scores) {
+        while(scoresEl.firstChild) {
+          scoresEl.removeChild(scoresEl.firstChild);
+        }
+
+        var sorted = Object.keys(scores)
+          .reduce(function (acc, name) {
+            return acc.concat([{ name: name, points: scores[name] }]);
+          }, [])
+          .sort(function (a, b) {
+            return b.points - a.points;
+          });
+
+        sorted.forEach(function (player) {
+          var li = document.createElement('li');
+          var b = document.createElement('b');
+          b.textContent = player.name + ':';
+          b.className = 'name';
+          var i = document.createElement('i');
+          i.textContent = player.points;
+          i.className = 'score';
+          li.appendChild(b);
+          li.appendChild(i);
+
+          scoresEl.appendChild(li);
+        });
+      }
+    </script>
+  </body>
+</html>
