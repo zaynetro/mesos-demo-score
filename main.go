@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ type scores struct {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	log.Println("Starting demo score server...")
 
 	scores := scores{
