@@ -30,6 +30,11 @@ func main() {
 	}
 	sendUpdate := make(chan struct{}, 3)
 
+	if os.Getenv("MODE") == "PROD" {
+		log.Println("Setting gin to prod mode...")
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
